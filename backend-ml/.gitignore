@@ -23,6 +23,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.env
+backend-ml/.env
+frontend/.env
+*.env
+
 
 # Virtual Environment
 .venv/
