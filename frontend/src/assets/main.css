@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+@import 'tailwindcss';
+
+/* ============================================
+   CUSTOM CSS VARIABLES & THEME FOR TAILWIND V4
+   ============================================ */
+@theme {
+  /* Primary Colors - these create utilities like bg-primary-blue, text-primary-blue */
+  --color-primary-blue: #4F46E5;
+  --color-primary-green: #10B981;
+  --color-navy-dark: #1E293B;
+  --color-gray-dark: #374151;
+  --color-bg-soft: #F8FAFC;
+  --color-border-light: #E2E8F0;
+  --color-warning: #F59E0B;
+  
+  /* Font Family */
+  --font-family-display: 'Poppins', system-ui, sans-serif;
+}
+
+body {
+  font-family: 'Poppins', system-ui, sans-serif;
+  /* let base.css control the background so it's consistent app-wide */
+  background-color: transparent;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================
+   UTILITY CLASSES FOR CUSTOM COLORS
+   (Backup for direct class usage)
+   ============================================ */
+
+/* Background Colors */
+.bg-primary-blue { background-color: #4F46E5; }
+.bg-primary-green { background-color: #10B981; }
+.bg-navy-dark { background-color: #1E293B; }
+.bg-gray-dark { background-color: #374151; }
+.bg-bg-soft { background-color: #F8FAFC; }
+.bg-warning { background-color: #F59E0B; }
+
+/* Text Colors */
+.text-primary-blue { color: #4F46E5; }
+.text-primary-green { color: #10B981; }
+.text-navy-dark { color: #1E293B; }
+.text-gray-dark { color: #374151; }
+.text-warning { color: #F59E0B; }
+
+/* Border Colors */
+.border-primary-blue { border-color: #4F46E5; }
+.border-primary-green { border-color: #10B981; }
+.border-border-light { border-color: #E2E8F0; }
+
+/* Hover variants */
+.hover\:text-primary-blue:hover { color: #4F46E5; }
+.hover\:bg-primary-blue:hover { background-color: #4F46E5; }
+.hover\:border-primary-blue:hover { border-color: #4F46E5; }
+
+/* Custom Styles for SkinCheck */
+.gradient-primary {
+  background: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #4F46E5 0%, #06B6D4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.glow-icon {
+  box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3);
+}
+
+.rounded-4xl {
+  border-radius: 2rem;
+}
+
+/* Animation for dropdown */
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: all 0.2s ease;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}

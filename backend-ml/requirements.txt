@@ -1,0 +1,12 @@
+torch
+transformers
+Pillow
+flask 
+werkzeug
+flask-cors
+google-genai
+python-dotenv
+pymysql
+flask-jwt-extended
+bcrypt
+
