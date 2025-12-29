@@ -1,7 +1,16 @@
 <template>
-  <nav class="sticky top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-slate-200" style="height:72px; backdrop-filter: none;">
-    <div class="max-w-7xl mx-auto px-8 h-full">
-      <div class="flex items-center justify-between h-full">
+  <!-- Overlay (klik untuk tutup menu) -->
+  <div
+    v-if="mobileMenuOpen"
+    class="fixed inset-0 bg-black/30 z-40 md:hidden"
+    @click="closeMobileMenu"
+    aria-hidden="true"
+  />
+
+  <nav class="site-navbar sticky top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- TOP BAR (tinggi fix 72px) -->
+      <div class="h-[72px] flex items-center justify-between">
         <!-- Logo -->
         <router-link to="/" class="flex flex-col">
           <span class="text-2xl gradient-text">SkinGuard AI</span>
@@ -10,39 +19,40 @@
 
         <!-- Desktop Menu -->
         <div class="hidden md:flex items-center gap-8">
-          <router-link 
-            to="/" 
+          <router-link
+            to="/"
             class="hover:text-primary-blue transition-colors"
             :class="isActive('/') ? 'text-primary-blue' : 'text-gray-700'"
           >
             Beranda
           </router-link>
-          
-          <router-link 
-            to="/ai-check" 
+
+          <router-link
+            to="/ai-check"
             class="hover:text-primary-blue transition-colors"
             :class="isActive('/ai-check') ? 'text-primary-blue' : 'text-gray-700'"
           >
             AI Skin Check
           </router-link>
+
           <template v-if="isAuthenticated">
-            <router-link 
-              to="/history" 
+            <router-link
+              to="/history"
               class="hover:text-primary-blue transition-colors"
               :class="isActive('/history') ? 'text-primary-blue' : 'text-gray-700'"
             >
               Riwayat
             </router-link>
           </template>
-          
-          <router-link 
-            to="/dokumentasi" 
+
+          <router-link
+            to="/dokumentasi"
             class="hover:text-primary-blue transition-colors"
             :class="isActive('/dokumentasi') ? 'text-primary-blue' : 'text-gray-700'"
           >
             Dokumentasi
           </router-link>
-          
+
           <!-- Chat AI Button -->
           <button
             @click="openChatbot"
@@ -52,23 +62,23 @@
             <span class="text-base">💬</span>
             <span class="font-medium text-sm">Chat AI</span>
           </button>
-          
+
           <!-- Auth Buttons -->
           <template v-if="!isAuthenticated">
-            <router-link 
+            <router-link
               to="/login"
               class="px-4 py-2 rounded-md border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Masuk
             </router-link>
-            <router-link 
+            <router-link
               to="/register"
               class="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 transition-colors"
             >
               Daftar
             </router-link>
           </template>
-          
+
           <!-- User Menu -->
           <div v-else class="relative">
             <button
@@ -79,18 +89,18 @@
                 {{ user?.username?.charAt(0).toUpperCase() }}
               </div>
             </button>
-            
-            <!-- Dropdown -->
+
             <transition name="dropdown">
               <div
                 v-if="showUserMenu"
                 @click.away="showUserMenu = false"
-                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-sm py-2 z-50"
+                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-sm py-2 z-50 border border-slate-100"
               >
                 <div class="px-4 py-3 border-b border-gray-100">
                   <p class="text-sm text-navy-dark">{{ user?.full_name || user?.username }}</p>
                   <p class="text-xs text-gray-500">{{ user?.email }}</p>
                 </div>
+
                 <router-link
                   to="/history"
                   @click="showUserMenu = false"
@@ -99,6 +109,7 @@
                   <HistoryIcon :size="16" />
                   <span class="text-sm">Riwayat Analisis</span>
                 </router-link>
+
                 <button
                   @click="handleLogout"
                   class="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left text-red-600"
@@ -112,8 +123,8 @@
         </div>
 
         <!-- Mobile Menu Button -->
-        <button 
-          @click="toggleMobileMenu" 
+        <button
+          @click="toggleMobileMenu"
           class="md:hidden text-gray-700 hover:text-blue-600 transition-colors"
           aria-label="Open menu"
         >
@@ -121,80 +132,88 @@
           <X v-else :size="22" />
         </button>
       </div>
+    </div>
 
-      <!-- Mobile Menu -->
-      <transition name="slide">
-        <div v-if="mobileMenuOpen" class="md:hidden mt-0 pb-4">
-          <div class="flex flex-col gap-4">
-            <router-link 
-              to="/" 
+    <!-- MOBILE MENU PANEL (solid putih & rapi) -->
+    <transition name="slide">
+      <div
+        v-if="mobileMenuOpen"
+        class="md:hidden absolute left-0 right-0 top-[72px] bg-white border-t border-slate-200 shadow-md z-50"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div class="flex flex-col gap-3">
+            <router-link
+              to="/"
               @click="closeMobileMenu"
-              class="hover:text-primary-blue transition-colors"
-              :class="isActive('/') ? 'text-primary-blue' : 'text-gray-700'"
+              class="py-2 text-sm font-medium"
+              :class="isActive('/') ? 'text-primary-blue' : 'text-gray-800'"
             >
               Beranda
             </router-link>
-            
-            <router-link 
-              to="/ai-check" 
+
+            <router-link
+              to="/ai-check"
               @click="closeMobileMenu"
-              class="hover:text-primary-blue transition-colors"
-              :class="isActive('/ai-check') ? 'text-primary-blue' : 'text-gray-700'"
+              class="py-2 text-sm font-medium"
+              :class="isActive('/ai-check') ? 'text-primary-blue' : 'text-gray-800'"
             >
               AI Skin Check
             </router-link>
+
             <template v-if="isAuthenticated">
-              <router-link 
-                to="/history" 
+              <router-link
+                to="/history"
                 @click="closeMobileMenu"
-                class="hover:text-primary-blue transition-colors"
-                :class="isActive('/history') ? 'text-primary-blue' : 'text-gray-700'"
+                class="py-2 text-sm font-medium"
+                :class="isActive('/history') ? 'text-primary-blue' : 'text-gray-800'"
               >
                 Riwayat
               </router-link>
             </template>
-            
-            <router-link 
-              to="/dokumentasi" 
+
+            <router-link
+              to="/dokumentasi"
               @click="closeMobileMenu"
-              class="hover:text-primary-blue transition-colors"
-              :class="isActive('/dokumentasi') ? 'text-primary-blue' : 'text-gray-700'"
+              class="py-2 text-sm font-medium"
+              :class="isActive('/dokumentasi') ? 'text-primary-blue' : 'text-gray-800'"
             >
               Dokumentasi
             </router-link>
-            
-            <!-- Chat AI Button Mobile -->
+
             <button
               @click="openChatbot(); closeMobileMenu()"
-              class="flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full hover:shadow-sm transition-all duration-200"
+              class="mt-2 flex items-center justify-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full hover:shadow-sm transition-all duration-200"
             >
-              <span class="text-sm">Chat AI</span>
+              <span class="text-sm font-medium">Chat AI</span>
             </button>
-            
+
             <template v-if="!isAuthenticated">
-              <router-link 
-                to="/login"
-                @click="closeMobileMenu"
-                class="border-2 border-primary-blue text-primary-blue px-6 py-2.5 rounded-full hover:bg-blue-50 transition-colors text-center"
-              >
-                Masuk
-              </router-link>
-              <router-link 
-                to="/register"
-                @click="closeMobileMenu"
-                class="gradient-primary text-white px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity text-center"
-              >
-                Daftar
-              </router-link>
+              <div class="mt-2 grid grid-cols-2 gap-3">
+                <router-link
+                  to="/login"
+                  @click="closeMobileMenu"
+                  class="border border-blue-600 text-blue-700 px-4 py-2 rounded-full text-center text-sm font-medium hover:bg-blue-50"
+                >
+                  Masuk
+                </router-link>
+
+                <router-link
+                  to="/register"
+                  @click="closeMobileMenu"
+                  class="bg-blue-600 text-white px-4 py-2 rounded-full text-center text-sm font-medium hover:bg-blue-700"
+                >
+                  Daftar
+                </router-link>
+              </div>
             </template>
-            
+
             <template v-else>
-              <div class="pt-4 border-t border-gray-200">
+              <div class="mt-4 pt-4 border-t border-slate-200">
                 <p class="text-sm text-navy-dark mb-1">{{ user?.full_name || user?.username }}</p>
-                <p class="text-xs text-gray-500 mb-4">{{ user?.email }}</p>
+                <p class="text-xs text-gray-500 mb-3">{{ user?.email }}</p>
                 <button
                   @click="handleLogout"
-                  class="w-full text-left text-red-600 flex items-center gap-2"
+                  class="w-full text-left text-red-600 flex items-center gap-2 py-2"
                 >
                   <LogOut :size="16" />
                   <span>Keluar</span>
@@ -203,10 +222,11 @@
             </template>
           </div>
         </div>
-      </transition>
-    </div>
+      </div>
+    </transition>
   </nav>
 </template>
+
 
 <script setup>
 import { ref, computed } from 'vue'
