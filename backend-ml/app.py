@@ -309,17 +309,36 @@ def predict():
                 "message": "Tidak ada file yang dipilih"
             }), 400
         
-        if not allowed_file(file.filename):
-            return jsonify({
-                "status": "error",
-                "message": "Format file tidak didukung. Gunakan JPG, JPEG, atau PNG."
-            }), 400
-        
         # Save file
         filename = f"{uuid.uuid4()}_{secure_filename(file.filename)}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         file.save(filepath)
+
+        # Validate actual image content with Pillow (do not rely only on extension/mime)
+        from PIL import Image
+        try:
+            with Image.open(filepath) as img:
+                img_format = (img.format or '').lower()
+        except Exception as e:
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
+            return jsonify({
+                "status": "error",
+                "message": "File bukan gambar yang valid atau rusak"
+            }), 400
+
+        if img_format not in ('jpeg', 'jpg', 'png'):
+            try:
+                os.remove(filepath)
+            except Exception:
+                pass
+            return jsonify({
+                "status": "error",
+                "message": "Format file tidak didukung. Silakan unggah JPEG/PNG. Aplikasi klien akan mencoba mengonversi otomatis jika perlu."
+            }), 400
         
         # Predict
         result = predict_skin_disease(filepath)

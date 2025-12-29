@@ -17,6 +17,8 @@
     "@vueuse/motion": "^3.0.3",
     "autoprefixer": "^10.4.22",
     "axios": "^1.13.2",
+    "browser-image-compression": "^1.0.17",
+    "heic2any": "^0.0.4",
     "compressorjs": "^1.2.1",
     "lucide-vue-next": "^0.555.0",
     "tailwindcss": "^4.1.17",

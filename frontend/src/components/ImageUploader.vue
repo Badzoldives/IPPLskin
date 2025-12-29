@@ -21,7 +21,8 @@
           <input
             ref="fileInput"
             type="file"
-            accept="image/jpeg,image/png,image/jpg"
+            accept="image/*"
+            capture="environment"
             @change="handleFileSelect"
             class="hidden"
           />
@@ -89,7 +90,8 @@
           Ganti Foto
           <input
             type="file"
-            accept="image/jpeg,image/png,image/jpg"
+            accept="image/*"
+            capture="environment"
             @change="handleFileSelect"
             class="hidden"
           />
@@ -156,9 +158,15 @@ const validateFile = (file) => {
     return false
   }
 
-  if (!file.type.match(/image\/(jpeg|jpg|png)/)) {
-    error.value = 'Format file harus JPG atau PNG'
-    return false
+  // Accept any image MIME; fallback to extension check if MIME is absent/unusual
+  if (!file.type || !file.type.startsWith('image/')) {
+    const name = file.name || ''
+    const ext = name.split('.').pop()?.toLowerCase() || ''
+    const allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif']
+    if (!allowedExt.includes(ext)) {
+      error.value = 'Format file harus berupa gambar (JPG/PNG/WebP/HEIC)'
+      return false
+    }
   }
 
   const maxSize = props.maxSizeMB * 1024 * 1024
@@ -185,11 +193,50 @@ const compressFile = (file) => {
       success(result) {
         resolve(result)
       },
-      error(err) {
-        reject(err)
-      }
+        error(err) {
+          // Jika kompresi gagal (mis. format HEIC/unsupported), fallback gunakan file asli
+          resolve(file)
+        }
     })
   })
+}
+
+const convertToJpeg = async (file) => {
+  // Convert HEIC/HEIF/WEBP/other camera formats to JPEG using
+  // heic2any + browser-image-compression. Returns a File (image/jpeg).
+  try {
+    const imageCompressionModule = await import('browser-image-compression')
+    const imageCompression = imageCompressionModule.default || imageCompressionModule
+
+    const nameBase = 'capture'
+    const ext = (file.name || '').split('.').pop()?.toLowerCase() || ''
+
+    // HEIC/HEIF handling
+    if (ext === 'heic' || ext === 'heif' || (file.type && file.type.includes('heic'))) {
+      const heic2anyModule = await import('heic2any')
+      const heic2any = heic2anyModule.default || heic2anyModule
+      const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 })
+      const blob = Array.isArray(converted) ? converted[0] : converted
+      const compressed = await imageCompression(blob, {
+        maxWidthOrHeight: 1600,
+        initialQuality: 0.9,
+        fileType: 'image/jpeg',
+        useWebWorker: true
+      })
+      return new File([compressed], `${nameBase}.jpg`, { type: 'image/jpeg' })
+    }
+
+    // Other images (WEBP, PNG, etc.) — use imageCompression to convert/resize
+    const compressed = await imageCompression(file, {
+      maxWidthOrHeight: 1600,
+      initialQuality: 0.9,
+      fileType: 'image/jpeg',
+      useWebWorker: true
+    })
+    return new File([compressed], `${nameBase}.jpg`, { type: 'image/jpeg' })
+  } catch (err) {
+    throw err
+  }
 }
 
 const createPreview = (file) => {
@@ -207,6 +254,24 @@ const handleFileSelect = async (event) => {
   if (!validateFile(file)) return
 
   try {
+    // If file is already JPEG/PNG, compress as usual. Otherwise convert to JPEG first.
+    const isJpegPng = file.type && (file.type === 'image/jpeg' || file.type === 'image/png')
+    if (!isJpegPng) {
+      error.value = 'Format asli kamera tidak didukung, foto akan dikonversi otomatis'
+      try {
+        const converted = await convertToJpeg(file)
+        selectedFile.value = converted
+        createPreview(converted)
+        hasAnalyzed.value = false
+        error.value = null
+        return
+      } catch (convErr) {
+        error.value = 'Gagal mengonversi gambar: ' + (convErr.message || convErr)
+        emit('error', convErr)
+        return
+      }
+    }
+
     const compressedFile = await compressFile(file)
     selectedFile.value = compressedFile
     createPreview(compressedFile)
@@ -228,6 +293,23 @@ const handleDrop = async (event) => {
   if (!validateFile(file)) return
 
   try {
+    const isJpegPng = file.type && (file.type === 'image/jpeg' || file.type === 'image/png')
+    if (!isJpegPng) {
+      error.value = 'Format asli kamera tidak didukung, foto akan dikonversi otomatis'
+      try {
+        const converted = await convertToJpeg(file)
+        selectedFile.value = converted
+        createPreview(converted)
+        hasAnalyzed.value = false
+        error.value = null
+        return
+      } catch (convErr) {
+        error.value = 'Gagal mengonversi gambar: ' + (convErr.message || convErr)
+        emit('error', convErr)
+        return
+      }
+    }
+
     const compressedFile = await compressFile(file)
     selectedFile.value = compressedFile
     createPreview(compressedFile)
