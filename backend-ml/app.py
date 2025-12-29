@@ -11,6 +11,7 @@ from flask_jwt_extended import (
 )
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+from flask import jsonify
 
 # Import modules
 from src.inference import predict_skin_disease, get_model_info
@@ -72,7 +73,7 @@ jwt = JWTManager(app)
 
 # Configure CORS
 CORS(app, resources={
-    r"/*": {
+    r"/api/*": {
         "origins": [
             "http://localhost:5173", 
             "http://localhost:5174",
@@ -273,6 +274,9 @@ def model_info():
         "data": get_model_info()
     })
 
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status":"healthy"}), 200
 
 @app.route('/classes', methods=['GET'])
 def get_classes():
