@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { RouterView } from 'vue-router'
 import Navbar from './components/Navbar.vue'
-import Footer from './components/Footer.vue'
+// Footer removed globally per design request
 import FloatingChatbot from './components/FloatingChatbot.vue'
 
 const openChatFromNavbar = ref(false)
@@ -13,12 +13,12 @@ const handleOpenChatbot = () => {
 </script>
 
 <template>
-  <div id="app" class="min-h-screen flex flex-col bg-transparent">
+  <div id="app" class="min-h-screen flex flex-col bg-white">
     <Navbar @open-chatbot="handleOpenChatbot" />
     <main class="flex-1">
       <RouterView />
     </main>
-    <Footer />
+    <!-- Footer intentionally removed from global layout -->
     
     <!-- Floating Chatbot -->
     <FloatingChatbot 

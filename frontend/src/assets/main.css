@@ -19,12 +19,23 @@
   --font-family-display: 'Poppins', system-ui, sans-serif;
 }
 
+/* Global navbar height variable used across the app */
+:root {
+  --navbar-height: 72px;
+}
+
 body {
   font-family: 'Poppins', system-ui, sans-serif;
-  /* let base.css control the background so it's consistent app-wide */
-  background-color: transparent;
+  /* Make global background white */
+  background-color: #ffffff;
   margin: 0;
   box-sizing: border-box;
+  color: var(--color-gray-dark);
+}
+
+/* Ensure the root app container also uses white background */
+#app {
+  background-color: #ffffff;
 }
 
 /* ============================================
@@ -100,4 +111,11 @@ body {
   -webkit-backdrop-filter: none !important;
   z-index: 99999 !important;
   height: 72px !important;
+}
+
+/* Adjust common page top padding used for navbar offset to match actual navbar height.
+   Tailwind `pt-20` equals 5rem (80px) by default; many pages used `pt-20` to offset
+   the header — reduce it to 72px to remove the small white gap under the navbar. */
+.pt-20 {
+  padding-top: 72px !important;
 }
