@@ -31,7 +31,7 @@
             class="hover:text-primary-blue transition-colors"
             :class="isActive('/ai-check') ? 'text-primary-blue' : 'text-gray-700'"
           >
-            AI Skin Check
+            AI Skin Guard
           </router-link>
 
           <template v-if="isAuthenticated">
@@ -156,7 +156,7 @@
               class="py-2 text-sm font-medium"
               :class="isActive('/ai-check') ? 'text-primary-blue' : 'text-gray-800'"
             >
-              AI Skin Check
+              AI Skin Guard
             </router-link>
 
             <template v-if="isAuthenticated">
