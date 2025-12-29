@@ -230,7 +230,7 @@ const faqs = [
   },
   {
     question: 'Apakah ini pengganti dokter?',
-    answer: 'Tidak sama sekali. SkinGuard AI adalah alat bantu deteksi dini yang memberikan informasi edukatif awal. Hasil analisis AI tidak dapat menggantikan diagnosis medis profesional. Anda tetap harus berkonsultasi dengan dokter atau dermatolog untuk diagnosis yang akurat dan pengobatan yang tepat.'
+    answer: 'Tidak sama sekali. SkinCheck AI adalah alat bantu deteksi dini yang memberikan informasi edukatif awal. Hasil analisis AI tidak dapat menggantikan diagnosis medis profesional. Anda tetap harus berkonsultasi dengan dokter atau dermatolog untuk diagnosis yang akurat dan pengobatan yang tepat.'
   },
   {
     question: 'Berapa lama analisis?',

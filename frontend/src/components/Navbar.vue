@@ -12,9 +12,8 @@
       <!-- TOP BAR (tinggi fix 72px) -->
       <div class="h-[72px] flex items-center justify-between">
         <!-- Logo -->
-        <router-link to="/" class="flex flex-col">
+          <router-link to="/" class="flex flex-col">
           <span class="text-2xl gradient-text">SkinGuard AI</span>
-          <span class="text-xs text-gray-500">AI-Powered Skin Health</span>
         </router-link>
 
         <!-- Desktop Menu -->

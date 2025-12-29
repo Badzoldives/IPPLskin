@@ -21,7 +21,7 @@
               AI-Skin Disease Detect
             </h1>
             <p class="text-lg text-white/95 mb-8">
-              Dengan teknologi AI yang dilatih dari ribuan data medis, SkinCheck AI mampu mendeteksi gejala awal berbagai kondisi kulit secara instan. Solusi modern untuk pengecekan kulit mandiri.
+              Dengan teknologi AI yang dilatih dari ribuan data medis, SkinGuard AI mampu mendeteksi gejala awal berbagai kondisi kulit secara instan. Solusi modern untuk pengecekan kulit mandiri.
             </p>
             <div class="flex gap-4 mb-8">
               <router-link
@@ -52,7 +52,7 @@
               >
                 <img
                   src="@/assets/doctor-hero.png"
-                    alt="Dokter konsultasi online SkinCheck AI"
+                    alt="Dokter konsultasi online SkinGuard AI"
                   class="w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
                 />
               </div>
@@ -117,7 +117,7 @@ const steps = [
 const faqs = [
   {
     question: 'Apakah ini menggantikan dokter?',
-    answer: 'Tidak. SkinCheck AI adalah alat bantu deteksi dini yang memberikan informasi awal. Untuk diagnosis pasti dan pengobatan, Anda tetap harus berkonsultasi dengan dokter atau dermatolog profesional.'
+    answer: 'Tidak. SkinGuard AI adalah alat bantu deteksi dini yang memberikan informasi awal. Untuk diagnosis pasti dan pengobatan, Anda tetap harus berkonsultasi dengan dokter atau dermatolog profesional.'
   },
   {
     question: 'Apakah foto saya disimpan?',
