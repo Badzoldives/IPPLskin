@@ -1,5 +1,5 @@
 <template>
-  <nav class="sticky top-0 left-0 right-0 z-50" style="height:72px; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E9EEF5;">
+  <nav class="sticky top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-slate-200" style="height:72px; backdrop-filter: none;">
     <div class="max-w-7xl mx-auto px-8 h-full">
       <div class="flex items-center justify-between h-full">
         <!-- Logo -->
