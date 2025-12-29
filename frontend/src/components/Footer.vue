@@ -4,7 +4,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <!-- Brand -->
         <div>
-          <div class="gradient-text text-2xl mb-2">SkinGuard AI</div>
+          <div class="gradient-text text-2xl mb-2">SkinCheck AI</div>
           <p class="text-gray-400 text-sm">
             AI-Powered Skin Health Detection
           </p>
@@ -41,7 +41,7 @@
       </div>
 
       <div class="border-t border-gray-700 pt-6 text-center text-sm text-gray-400">
-        © {{ currentYear }} SkinGuard AI. All rights reserved.
+        © {{ currentYear }} SkinCheck AI. All rights reserved.
       </div>
     </div>
   </footer>

@@ -64,7 +64,7 @@ const router = createRouter({
 
 // Update document title
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'SkinCheck'
+  document.title = to.meta.title || 'SkinCheck AI'
   next()
 })
 

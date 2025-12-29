@@ -16,7 +16,7 @@
           <div>
             <h1 class="text-4xl mb-3">Tata Cara Penggunaan</h1>
             <p class="text-lg text-gray-600">
-              Panduan lengkap menggunakan SkinGuard AI untuk deteksi kondisi kulit
+              Panduan lengkap menggunakan SkinCheck AI untuk deteksi kondisi kulit
             </p>
           </div>
         </div>

@@ -52,7 +52,7 @@
               >
                 <img
                   src="@/assets/doctor-hero.png"
-                  alt="Dokter konsultasi online SkinGuard AI"
+                    alt="Dokter konsultasi online SkinCheck AI"
                   class="w-72 md:w-80 lg:w-96 object-contain drop-shadow-xl"
                 />
               </div>
@@ -117,7 +117,7 @@ const steps = [
 const faqs = [
   {
     question: 'Apakah ini menggantikan dokter?',
-    answer: 'Tidak. SkinGuard AI adalah alat bantu deteksi dini yang memberikan informasi awal. Untuk diagnosis pasti dan pengobatan, Anda tetap harus berkonsultasi dengan dokter atau dermatolog profesional.'
+    answer: 'Tidak. SkinCheck AI adalah alat bantu deteksi dini yang memberikan informasi awal. Untuk diagnosis pasti dan pengobatan, Anda tetap harus berkonsultasi dengan dokter atau dermatolog profesional.'
   },
   {
     question: 'Apakah foto saya disimpan?',

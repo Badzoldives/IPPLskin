@@ -37,7 +37,7 @@
               <span class="text-2xl">🤖</span>
             </div>
             <div>
-              <h3 class="text-white font-semibold">SkinGuard AI Assistant</h3>
+              <h3 class="text-white font-semibold">SkinCheck AI Assistant</h3>
               <p class="text-blue-100 text-xs">Selalu siap membantu</p>
             </div>
           </div>
