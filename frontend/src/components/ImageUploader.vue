@@ -27,12 +27,7 @@
           />
         </label>
         
-        <button
-          @click="useExample"
-          class="mt-4 border-2 border-primary-blue text-primary-blue px-8 py-3 rounded-full hover:bg-blue-50 transition-colors"
-        >
-          Gunakan Contoh Gambar
-        </button>
+        
       </div>
     </div>
 
@@ -243,15 +238,7 @@ const handleDrop = async (event) => {
   }
 }
 
-const useExample = () => {
-  const exampleUrl = 'https://images.unsplash.com/photo-1606501161752-e4be315c8b60?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxza2luJTIwY2FyZSUyMGRlcm1hdG9sb2d5fGVufDF8fHx8MTc2NDI1MTQ0MXww&ixlib=rb-4.1.0&q=80&w=1080'
-  
-  // Create a fake file object for example image
-  selectedFile.value = new File([], 'example.jpg', { type: 'image/jpeg' })
-  previewUrl.value = exampleUrl
-  hasAnalyzed.value = false
-  error.value = null
-}
+// Example image feature removed
 
 const uploadToServer = async (file) => {
   isUploading.value = true
