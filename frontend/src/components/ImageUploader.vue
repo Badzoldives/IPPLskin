@@ -1,5 +1,13 @@
 <template>
   <div class="image-uploader">
+    <!-- Hidden file input always present to ensure trigger works -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept="image/*"
+      class="hidden"
+      @change="onFileChange"
+    />
     <!-- Upload Area -->
     <div
       v-if="!previewUrl"
@@ -14,19 +22,13 @@
           <Upload :size="40" class="text-white" />
         </div>
         <h3 class="mb-2">Tarik & lepaskan atau klik untuk memilih file</h3>
-        <p class="text-gray-500 mb-6">Format: JPG, PNG (Max {{ maxSizeMB }}MB)</p>
-        
-        <label class="gradient-primary text-white px-8 py-3 rounded-full hover:opacity-90 transition-opacity cursor-pointer">
-          Pilih Foto
-          <input
-            ref="fileInput"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            @change="handleFileSelect"
-            class="hidden"
-          />
-        </label>
+        <p class="text-gray-500 mb-6">Format: JPG, JPEG, PNG, WEBP (Max {{ maxSizeMB }}MB). Format HEIC belum didukung.</p>
+
+        <div class="flex gap-4">
+          <label class="bg-white border border-gray-200 text-gray-800 px-6 py-3 rounded-full hover:bg-gray-50 transition-opacity cursor-pointer flex-1 text-center" @click.prevent="triggerFilePicker">
+            Pilih Foto
+          </label>
+        </div>
         
         
       </div>
@@ -75,27 +77,23 @@
         <CheckCircle2 :size="24" class="text-primary-green" />
       </div>
       
-      <!-- Action Buttons -->
+      <!-- Action Buttons: Ganti Foto + Analisis Sekarang -->
       <div class="flex gap-4">
-        <button
-          @click="analyzeImage"
-          :disabled="isAnalyzing || isUploading"
-          class="flex-1 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium shadow-md"
-        >
-          <Loader2 v-if="isAnalyzing" :size="20" class="animate-spin" />
-          <span>{{ isAnalyzing ? 'Menganalisis...' : 'Analisis Sekarang' }}</span>
-        </button>
-        
-        <label class="flex-1 border-2 border-blue-600 text-blue-600 px-6 py-3 rounded-full hover:bg-blue-50 transition-colors cursor-pointer text-center font-medium shadow-sm">
-          Ganti Foto
-          <input
-            type="file"
-            accept="image/*"
-            capture="environment"
-            @change="handleFileSelect"
-            class="hidden"
-          />
-        </label>
+        <div class="flex-1 grid grid-cols-2 gap-2">
+          <button
+            @click="triggerFilePicker"
+            class="border border-gray-300 text-gray-700 px-4 py-3 rounded-full hover:bg-gray-50 transition-colors cursor-pointer text-center font-medium shadow-sm"
+          >
+            Ganti Foto
+          </button>
+          <button
+            @click="analyzeImage"
+            :disabled="isAnalyzing || isUploading"
+            class="border border-blue-600 text-blue-600 px-4 py-3 rounded-full hover:bg-blue-50 transition-colors cursor-pointer text-center font-medium shadow-sm"
+          >
+            {{ isAnalyzing ? 'Menganalisis...' : 'Analisis Sekarang' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -132,6 +130,9 @@ const props = defineProps({
 const emit = defineEmits(['upload-success', 'analyze-complete', 'error'])
 
 const fileInput = ref(null)
+const prevObjectUrl = ref(null)
+const analysisResult = ref(null)
+const isSkinValid = ref(null)
 const selectedFile = ref(null)
 const previewUrl = ref(null)
 const isDragging = ref(false)
@@ -152,21 +153,27 @@ const fileSizeFormatted = computed(() => {
 
 const validateFile = (file) => {
   error.value = null
-  
+
   if (!file) {
     error.value = 'File tidak ditemukan'
     return false
   }
 
-  // Accept any image MIME; fallback to extension check if MIME is absent/unusual
-  if (!file.type || !file.type.startsWith('image/')) {
-    const name = file.name || ''
-    const ext = name.split('.').pop()?.toLowerCase() || ''
-    const allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif']
-    if (!allowedExt.includes(ext)) {
-      error.value = 'Format file harus berupa gambar (JPG/PNG/WebP/HEIC)'
-      return false
-    }
+  const name = file.name || ''
+  const ext = name.split('.').pop()?.toLowerCase() || ''
+
+  // Reject HEIC/HEIF explicitly per user request
+  if (ext === 'heic' || ext === 'heif' || (file.type && file.type.includes('heic'))) {
+    error.value = 'Format HEIC belum didukung, silakan pilih JPG/PNG'
+    return false
+  }
+
+  const allowedExt = ['jpg', 'jpeg', 'png', 'webp']
+  if (file.type && file.type.startsWith('image/')) {
+    // allow image MIME types; some browsers may report webp/png/jpeg
+  } else if (!allowedExt.includes(ext)) {
+    error.value = 'Format file harus JPG/JPEG/PNG/WEBP'
+    return false
   }
 
   const maxSize = props.maxSizeMB * 1024 * 1024
@@ -201,123 +208,148 @@ const compressFile = (file) => {
   })
 }
 
-const convertToJpeg = async (file) => {
-  // Convert HEIC/HEIF/WEBP/other camera formats to JPEG using
-  // heic2any + browser-image-compression. Returns a File (image/jpeg).
-  try {
-    const imageCompressionModule = await import('browser-image-compression')
-    const imageCompression = imageCompressionModule.default || imageCompressionModule
-
-    const nameBase = 'capture'
-    const ext = (file.name || '').split('.').pop()?.toLowerCase() || ''
-
-    // HEIC/HEIF handling
-    if (ext === 'heic' || ext === 'heif' || (file.type && file.type.includes('heic'))) {
-      const heic2anyModule = await import('heic2any')
-      const heic2any = heic2anyModule.default || heic2anyModule
-      const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 })
-      const blob = Array.isArray(converted) ? converted[0] : converted
-      const compressed = await imageCompression(blob, {
-        maxWidthOrHeight: 1600,
-        initialQuality: 0.9,
-        fileType: 'image/jpeg',
-        useWebWorker: true
-      })
-      return new File([compressed], `${nameBase}.jpg`, { type: 'image/jpeg' })
-    }
-
-    // Other images (WEBP, PNG, etc.) — use imageCompression to convert/resize
-    const compressed = await imageCompression(file, {
-      maxWidthOrHeight: 1600,
-      initialQuality: 0.9,
-      fileType: 'image/jpeg',
-      useWebWorker: true
-    })
-    return new File([compressed], `${nameBase}.jpg`, { type: 'image/jpeg' })
-  } catch (err) {
-    throw err
-  }
-}
+// No client-side HEIC conversion: HEIC is rejected and user is asked to provide JPG/PNG.
 
 const createPreview = (file) => {
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    previewUrl.value = e.target.result
-  }
-  reader.readAsDataURL(file)
+  // Revoke previous object URL to prevent leaks
+  try {
+    if (prevObjectUrl.value) {
+      URL.revokeObjectURL(prevObjectUrl.value)
+      prevObjectUrl.value = null
+    }
+  } catch (e) {}
+
+  const url = URL.createObjectURL(file)
+  previewUrl.value = url
+  prevObjectUrl.value = url
 }
 
-const handleFileSelect = async (event) => {
-  const file = event.target.files?.[0]
+const handleSelectedFile = async (file) => {
   if (!file) return
 
   if (!validateFile(file)) return
 
   try {
-    // If file is already JPEG/PNG, compress as usual. Otherwise convert to JPEG first.
-    const isJpegPng = file.type && (file.type === 'image/jpeg' || file.type === 'image/png')
-    if (!isJpegPng) {
-      error.value = 'Format asli kamera tidak didukung, foto akan dikonversi otomatis'
-      try {
-        const converted = await convertToJpeg(file)
-        selectedFile.value = converted
-        createPreview(converted)
-        hasAnalyzed.value = false
-        error.value = null
-        return
-      } catch (convErr) {
-        error.value = 'Gagal mengonversi gambar: ' + (convErr.message || convErr)
-        emit('error', convErr)
-        return
-      }
-    }
-
-    const compressedFile = await compressFile(file)
-    selectedFile.value = compressedFile
-    createPreview(compressedFile)
+    // Do not attempt to convert HEIC — validateFile already rejected HEIC.
+    // Create preview immediately, then process/compress in background and replace selectedFile
+    createPreview(file)
+    selectedFile.value = file
+    // reset analysis state
+    analysisResult.value = null
+    isSkinValid.value = null
     hasAnalyzed.value = false
-    
-    // Auto upload (optional)
-    // await uploadToServer(compressedFile)
+    error.value = null
+
+    const processed = await compressFile(file)
+    selectedFile.value = processed
+    // update preview to processed blob (revoke old URL)
+    createPreview(processed)
   } catch (err) {
-    error.value = 'Gagal memproses gambar: ' + err.message
+    error.value = 'Gagal memproses gambar: ' + (err?.message || err)
     emit('error', err)
   }
+}
+
+const onFileChange = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  // Reset previous analysis state and errors
+  analysisResult.value = null
+  error.value = null
+  isSkinValid.value = null
+  hasAnalyzed.value = false
+  isAnalyzing.value = false
+  isUploading.value = false
+  uploadProgress.value = 0
+
+  // Revoke old preview if any
+  try { if (prevObjectUrl.value) { URL.revokeObjectURL(prevObjectUrl.value); prevObjectUrl.value = null } } catch (e) {}
+
+  // Immediately set preview using object URL
+  const objUrl = URL.createObjectURL(file)
+  previewUrl.value = objUrl
+  prevObjectUrl.value = objUrl
+
+  // Process file (compress and set selectedFile)
+  handleSelectedFile(file)
+
+  // Reset input value so same file can be selected again
+  try { event.target.value = '' } catch (e) {}
+}
+
+const triggerFilePicker = () => {
+  if (!fileInput.value) return
+  try { fileInput.value.value = '' } catch (e) {}
+  fileInput.value.click()
+}
+
+// Simple skin-detection heuristic using RGB thresholds on a downsized canvas.
+// Returns true if a sufficient proportion of sampled pixels look like skin.
+const isLikelySkinImage = (file) => {
+  return new Promise((resolve) => {
+    try {
+      const img = new Image()
+      img.onload = () => {
+        // draw to small canvas
+        const MAX = 200
+        const w = img.width
+        const h = img.height
+        const scale = Math.min(1, Math.max(1, Math.min(MAX / w, MAX / h)))
+        const cw = Math.max(50, Math.floor(w * scale))
+        const ch = Math.max(50, Math.floor(h * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = cw
+        canvas.height = ch
+        const ctx = canvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, cw, ch)
+        try {
+          const data = ctx.getImageData(0, 0, cw, ch).data
+          let skinCount = 0
+          let total = 0
+          // sample every 4th pixel to speed up
+          for (let i = 0; i < data.length; i += 4 * 4) {
+            const r = data[i]
+            const g = data[i + 1]
+            const b = data[i + 2]
+
+            // basic RGB skin heuristic
+            const max = Math.max(r, g, b)
+            const min = Math.min(r, g, b)
+            const rgDiff = Math.abs(r - g)
+            if (
+              r > 95 && g > 40 && b > 20 &&
+              max - min > 15 && r > g && r > b && rgDiff > 15
+            ) {
+              skinCount++
+            }
+            total++
+          }
+          const ratio = total > 0 ? skinCount / total : 0
+          // consider image skin if > 15% of sampled pixels match heuristic
+          resolve(ratio >= 0.15)
+        } catch (e) {
+          // If cross-origin or other error, fallback to allowing analysis
+          resolve(true)
+        }
+      }
+      img.onerror = () => resolve(true)
+      const reader = new FileReader()
+      reader.onload = (ev) => {
+        img.src = ev.target.result
+      }
+      reader.readAsDataURL(file)
+    } catch (e) {
+      resolve(true)
+    }
+  })
 }
 
 const handleDrop = async (event) => {
   isDragging.value = false
   const file = event.dataTransfer.files[0]
-  
   if (!file) return
-  if (!validateFile(file)) return
-
-  try {
-    const isJpegPng = file.type && (file.type === 'image/jpeg' || file.type === 'image/png')
-    if (!isJpegPng) {
-      error.value = 'Format asli kamera tidak didukung, foto akan dikonversi otomatis'
-      try {
-        const converted = await convertToJpeg(file)
-        selectedFile.value = converted
-        createPreview(converted)
-        hasAnalyzed.value = false
-        error.value = null
-        return
-      } catch (convErr) {
-        error.value = 'Gagal mengonversi gambar: ' + (convErr.message || convErr)
-        emit('error', convErr)
-        return
-      }
-    }
-
-    const compressedFile = await compressFile(file)
-    selectedFile.value = compressedFile
-    createPreview(compressedFile)
-    hasAnalyzed.value = false
-  } catch (err) {
-    error.value = 'Gagal memproses gambar: ' + err.message
-    emit('error', err)
-  }
+  await handleSelectedFile(file)
 }
 
 // Example image feature removed
@@ -352,8 +384,15 @@ const analyzeImage = async () => {
   error.value = null
 
   try {
+    // Run simple skin presence check first
+    const isSkin = await isLikelySkinImage(selectedFile.value)
+    if (!isSkin) {
+      error.value = 'Foto tidak terdeteksi sebagai kulit. Silakan upload foto area kulit dengan pencahayaan baik.'
+      isAnalyzing.value = false
+      return
+    }
+
     const { predictImage } = await import('../utils/api')
-    
     // Directly predict using the image file
     const result = await predictImage(selectedFile.value)
     hasAnalyzed.value = true
@@ -371,10 +410,17 @@ const analyzeImage = async () => {
 defineExpose({
   reset: () => {
     selectedFile.value = null
+    // revoke preview URL if any
+    try { if (prevObjectUrl.value) { URL.revokeObjectURL(prevObjectUrl.value); prevObjectUrl.value = null } } catch (e) {}
     previewUrl.value = null
     error.value = null
     hasAnalyzed.value = false
     uploadProgress.value = 0
+    analysisResult.value = null
+    isSkinValid.value = null
+    isAnalyzing.value = false
+    isUploading.value = false
+    if (fileInput.value) try { fileInput.value.value = '' } catch (e) {}
   }
 })
 </script>
